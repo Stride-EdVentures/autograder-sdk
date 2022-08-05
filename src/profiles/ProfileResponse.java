@@ -8,6 +8,9 @@ public class ProfileResponse {
     public String id;
 
     @Key
+    public String email;
+
+    @Key
     public boolean is_teacher;
 
     @Key
