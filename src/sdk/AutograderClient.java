@@ -1,3 +1,4 @@
+package sdk;
 import assignments.AutograderAssignment;
 import authentication.AuthenticationRequest;
 import authentication.AuthenticationResponse;
