@@ -2,6 +2,7 @@ package sdk;
 import assignments.AutograderAssignment;
 import authentication.AuthenticationRequest;
 import authentication.AuthenticationResponse;
+import authentication.InviteTeacherRequest;
 import classes.AutograderClass;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpHeaders;
@@ -44,6 +45,7 @@ public class AutograderClient {
     private final static JsonFactory JSON_FACTORY = new JacksonFactory();
     private final String supabaseBaseUrl;
     private final String supabaseAnonKey;
+    private final String AUTOGRADER_BASE_URL = "https://autograder-nchs.vercel.app";
     private String accessToken;
 
     public AutograderClient(String supabaseBaseUrl, String supabaseAnonKey) {
@@ -126,6 +128,33 @@ public class AutograderClient {
         }
 
         return null;
+    }
+
+    /**
+     * Invites a teacher to the Autograder application by emailing them.
+     * @param currentEmail The email of the teacher of the client.
+     * @param email The email of the teacher to invite.
+     * @return Whether the request was successful.
+     * @throws IOException If the request could not be successfully sent, an IOException is thrown.
+     */
+    public boolean inviteTeacher(String currentEmail, String email) throws IOException {
+        if (this.accessToken == null) {
+            return false;
+        }
+
+        HttpRequestFactory requestFactory = HTTP_TRANSPORT.createRequestFactory(request -> {
+            request.setParser(new JsonObjectParser(JSON_FACTORY));
+        });
+
+        HttpRequest request = requestFactory.buildPostRequest(
+                new GenericUrl(this.AUTOGRADER_BASE_URL + "/inviteTeacher"),
+                new JsonHttpContent(JSON_FACTORY, new InviteTeacherRequest(currentEmail, email))
+        );
+
+        HttpHeaders headers = request.getHeaders();
+        headers.setAuthorization("Bearer " + this.accessToken);
+        HttpResponse httpResponse = request.execute();
+        return httpResponse.isSuccessStatusCode();
     }
 
     /**
