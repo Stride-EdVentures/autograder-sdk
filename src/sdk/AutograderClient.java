@@ -3,6 +3,7 @@ import assignments.AutograderAssignment;
 import authentication.AuthenticationRequest;
 import authentication.AuthenticationResponse;
 import authentication.InviteTeacherRequest;
+import authentication.User;
 import classes.AutograderClass;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpHeaders;
@@ -47,11 +48,13 @@ public class AutograderClient {
     private final String supabaseAnonKey;
     private final String AUTOGRADER_BASE_URL = "https://autograder-nchs.vercel.app";
     private String accessToken;
+    private User authenticatedUser;
 
     public AutograderClient(String supabaseBaseUrl, String supabaseAnonKey) {
         this.supabaseBaseUrl = supabaseBaseUrl;
         this.supabaseAnonKey = supabaseAnonKey;
         this.accessToken = supabaseAnonKey;
+        this.authenticatedUser = null;
     }
 
     /**
@@ -84,6 +87,7 @@ public class AutograderClient {
         if (httpResponse.isSuccessStatusCode()) {
             AuthenticationResponse authenticationResponse = httpResponse.parseAs(AuthenticationResponse.class);
             this.accessToken = authenticationResponse.access_token;
+            this.authenticatedUser = authenticationResponse.user;
             return authenticationResponse;
         }
 
@@ -132,12 +136,11 @@ public class AutograderClient {
 
     /**
      * Invites a teacher to the Autograder application by emailing them.
-     * @param currentEmail The email of the teacher of the client.
      * @param email The email of the teacher to invite.
      * @return Whether the request was successful.
      * @throws IOException If the request could not be successfully sent, an IOException is thrown.
      */
-    public boolean inviteTeacher(String currentEmail, String email) throws IOException {
+    public boolean inviteTeacher(String email) throws IOException {
         if (this.accessToken == null) {
             return false;
         }
@@ -147,14 +150,14 @@ public class AutograderClient {
         });
 
         HttpRequest request = requestFactory.buildPostRequest(
-                new GenericUrl(this.AUTOGRADER_BASE_URL + "/inviteTeacher"),
-                new JsonHttpContent(JSON_FACTORY, new InviteTeacherRequest(currentEmail, email))
+                new GenericUrl(this.AUTOGRADER_BASE_URL + "/api/auth/inviteTeacher"),
+                new JsonHttpContent(JSON_FACTORY, new InviteTeacherRequest(this.authenticatedUser.email, email))
         );
 
         HttpHeaders headers = request.getHeaders();
         headers.setAuthorization("Bearer " + this.accessToken);
         HttpResponse httpResponse = request.execute();
-        return httpResponse.isSuccessStatusCode();
+        return httpResponse.parseAs(Boolean.TYPE);
     }
 
     /**
