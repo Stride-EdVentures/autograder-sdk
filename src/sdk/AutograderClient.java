@@ -22,6 +22,7 @@ import storage.SortOptions;
 import storage.SubmissionResponse;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -310,6 +311,41 @@ public class AutograderClient {
      */
     public List<SubmissionResponse> getSubmittedFilesForVersion(String studentId, String assignmentId, String version) throws IOException {
         return getFilesInformation("submissions", studentId + "/" + assignmentId + "/" + version);
+    }
+    
+    /**
+     * Get the contents of the file with the given file name. This method returns the contents in plain text as opposed
+     * to the bytes constituting the file.
+     * @param studentId The id of student.
+     * @param assignmentId The id of the assignment that the student submitted files for.
+     * @param version The submission version to use.
+     * @param fileName The name of the file to download.
+     * @return The InputStream of the file downloaded.
+     * @throws IOException If the request could not be successfully sent, an IOException is thrown.
+     */
+    public InputStream getFileInputStream(String studentId, String assignmentId, String version, String fileName) throws IOException {
+        if (this.accessToken == null) {
+            return null;
+        }
+
+        HttpRequestFactory requestFactory = HTTP_TRANSPORT.createRequestFactory(request -> {
+            request.setParser(new JsonObjectParser(JSON_FACTORY));
+        });
+
+        String path = "submissions/" + studentId + "/" + assignmentId + "/" + version + "/" + fileName;
+        HttpRequest request = requestFactory.buildGetRequest(new GenericUrl(
+                this.supabaseBaseUrl + "/storage/v1/object/" + path
+        ));
+
+        HttpHeaders headers = request.getHeaders();
+        headers.set("apikey", this.supabaseAnonKey);
+        headers.setAuthorization("Bearer " + this.accessToken);
+        HttpResponse httpResponse = request.execute();
+        if (httpResponse.isSuccessStatusCode()) {
+            return httpResponse.getContent();
+        }
+
+        return null;
     }
 
     /**
