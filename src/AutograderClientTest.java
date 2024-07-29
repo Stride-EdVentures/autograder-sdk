@@ -11,11 +11,7 @@ import submissions.AssignmentSubmissionResponse;
 public class AutograderClientTest {
 
 	// Note: using service key, needed to get to submissions
-	AutograderClient client = new AutograderClient(
-//          "https://rhojoslgtpvnlmsfppjq.supabase.co",
-//			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJob2pvc2xndHB2bmxtc2ZwcGpxIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NTU1MDE0MTQsImV4cCI6MTk3MTA3NzQxNH0.GYmHNPhcL-uiKxA_ImhxvEd8iM6FyxDh3n2etfODVag");
-			"https://dkcshyaivhlizysxlwbg.supabase.co",
-			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrY3NoeWFpdmhsaXp5c3hsd2JnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcxMDI4Mzk1NywiZXhwIjoyMDI1ODU5OTU3fQ.Xdmi4IONsxDmsrxGTgYvnrt7CuaJBPbRLDgZT8Gfi5U");
+	AutograderClient client = new AutograderClient("supabaseBaseUrl", "supabaseAnonKey");
 
 	public static void main(String[] args) throws IOException {
 		AutograderClientTest tester = new AutograderClientTest();
