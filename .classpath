@@ -19,8 +19,8 @@
 	<classpathentry kind="lib" path="jars/gson-2.9.0.jar"/>
 	<classpathentry kind="lib" path="jars/guava-jdk5-17.0.jar"/>
 	<classpathentry kind="lib" path="jars/httpclient-4.0.1.jar"/>
-	<classpathentry kind="lib" path="C:/Users/jstride/Documents/Projects/autograder-sdk/jars/jackson-core-2.16.0.jar"/>
 	<classpathentry kind="lib" path="jars/httpcore-4.0.1.jar"/>
+	<classpathentry kind="lib" path="jars/jackson-core-2.16.0.jar"/>
 	<classpathentry kind="lib" path="jars/javax.mail.jar"/>
 	<classpathentry kind="lib" path="jars/jetty-6.1.26.jar"/>
 	<classpathentry kind="lib" path="jars/jetty-util-6.1.26.jar"/>

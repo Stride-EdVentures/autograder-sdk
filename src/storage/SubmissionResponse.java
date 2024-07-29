@@ -6,6 +6,8 @@ public class SubmissionResponse {
     @Key
     public String name;
 
+    public Integer version;
+    
     @Key
     public String id;
 

@@ -9,7 +9,10 @@ public class AutograderClass {
 
     @Key
     public String name;
-
+    
     @Key
+    public String quarter;
+
+    @Key("assignment")
     public AutograderAssignment[] assignments;
 }

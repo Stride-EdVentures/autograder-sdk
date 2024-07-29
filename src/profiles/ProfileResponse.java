@@ -10,9 +10,16 @@ public class ProfileResponse {
     @Key
     public String email;
 
-    @Key
-    public boolean is_teacher;
+    @Key("auth_id")
+    public String authId;
 
-    @Key
+    
+    //    @Key
+//    public boolean is_teacher;
+
+    // For Rest many-many relations
+    @Key("class")
+    public AutograderClass singleClass;
+    
     public AutograderClass[] classes;
 }
