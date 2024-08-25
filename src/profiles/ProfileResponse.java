@@ -1,6 +1,9 @@
 package profiles;
 
 import classes.AutograderClass;
+
+import java.util.Arrays;
+
 import com.google.api.client.util.Key;
 
 public class ProfileResponse {
@@ -22,4 +25,9 @@ public class ProfileResponse {
     public AutograderClass singleClass;
     
     public AutograderClass[] classes;
+    
+    @Override
+    public String toString() {
+       return String.format("email:%s, ID:%s, Classes:%s", email, id, classes == null ? "<none>" : Arrays.toString(classes));
+    }
 }

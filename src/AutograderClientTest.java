@@ -11,22 +11,24 @@ import submissions.AssignmentSubmissionResponse;
 public class AutograderClientTest {
 
 	// Note: using service key, needed to get to submissions
-	AutograderClient client = new AutograderClient("supabaseBaseUrl", "supabaseAnonKey");
-
+	AutograderClient client = new AutograderClient("supaURL", "supaAnonKey");
+	      
 	public static void main(String[] args) throws IOException {
 		AutograderClientTest tester = new AutograderClientTest();
 		System.out.println("\n **** testing STARTED **** \n");
 		tester.testGetStudentsInClass();
-		tester.getUserProfilesInClass();
+		tester.testGetUserProfilesInClass();
 		tester.testGetUserProfile();
 		tester.testGetAssignmentSubmissions();
 		tester.testGetAssignmentSubmission();
+		// download fails for Stride with 404
 		tester.testDownloadFile();
 		tester.testGetLatestSubmittedVersion();
 		tester.testGetLatestSubmittedVersionFileName();
 		tester.testGetClass();
 		tester.testGetSubmittedStudents();
 		tester.testGetSubmittedVersionsForAssignment();
+		// download fails for Stride with 404
 		tester.testGetFileInputStream();
 		System.out.println("\n **** testing DONE **** ");
 	}
@@ -37,7 +39,7 @@ public class AutograderClientTest {
 		System.out.println("testGetStudentsInClass " + response);
 	}
 
-	public void getUserProfilesInClass() throws IOException {
+	public void testGetUserProfilesInClass() throws IOException {
 		String classId = "1090d880-e9ed-4147-95c9-a62578a63429";
 		List<ProfileResponse> response = client.getUserProfilesInClass(classId, false);
 		System.out.println("getUserProfilesInClass " + response);
