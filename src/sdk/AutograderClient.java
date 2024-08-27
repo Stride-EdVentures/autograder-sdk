@@ -5,8 +5,11 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import com.google.api.client.http.GenericUrl;
@@ -121,26 +124,16 @@ public class AutograderClient {
 			return null;
 		}
 
-//        String queryString = RestQueryBuilder.from("profile")
-//                .select("*,class(*, assignment(*))")
-//                .equals("profile_id", userId)
-//                .generateQuery();
-
 		String queryString = RestQueryBuilder.from("enrollment")//
-				.select("*,class(*),profile(*))") //
+				.select("*,class(*, assignment(*)),profile(*))") //
 				.equals("profile_id", userId) //
 				.generateQuery();
 
 		HttpResponse httpResponse = this.createGetRequest(queryString).execute();
 		if (httpResponse.isSuccessStatusCode()) {
-			EnrollmentResponse[] responses = httpResponse.parseAs(EnrollmentResponse[].class);
-			if (responses.length > 0) {
-				List<AutograderClass> classes = new ArrayList<>();
-				for (EnrollmentResponse response : responses) {
-					classes.add(response.singleClass);
-				}
-				responses[0].profile.classes = classes.toArray(new AutograderClass[0]);
-				return responses[0].profile;
+			EnrollmentResponse[] enrollments = httpResponse.parseAs(EnrollmentResponse[].class);
+			if (enrollments.length > 0) {
+				return this.enrollments2profiles(enrollments).getFirst();
 			}
 		}
 
@@ -206,7 +199,7 @@ public class AutograderClient {
 	public List<ProfileResponse> getUserProfilesInClass(String classId, boolean studentsOnly) throws IOException {
 		if (this.accessToken != null) {
 			RestQueryBuilder queryBuilder = RestQueryBuilder.from("enrollment") //
-					.select("*, profile(*), class(*)") //
+					.select("*, profile(*), class(*, assignment(*))") //
 					.equals("class_id", classId);
 
 			if (studentsOnly) {
@@ -220,16 +213,10 @@ public class AutograderClient {
 			HttpResponse httpResponse = request.execute();
 			if (httpResponse.isSuccessStatusCode()) {
 				EnrollmentResponse[] enrollments = httpResponse.parseAs(EnrollmentResponse[].class);
-				if (enrollments.length > 0) {
-					List<ProfileResponse> profiles = new ArrayList<>();
-					for (EnrollmentResponse enrollment : enrollments) {
-						profiles.add(enrollment.profile);
-					}
-					return profiles;
-				}
+				return this.enrollments2profiles(enrollments);
 			}
 		}
-		return Collections.EMPTY_LIST;
+		return new ArrayList<>();
 	}
 
 	/**
@@ -438,26 +425,6 @@ public class AutograderClient {
 	}
 
 	/**
-	 * Gets the files that were submitted for a particular submission version by the
-	 * student for the assignment with the given id.
-	 * 
-	 * @param studentId    The id of the student.
-	 * @param assignmentId The id of the assignment for which the student submitted
-	 *                     files for.
-	 * @param version      The submission version from which to retrieve the files.
-	 * @return The files submitted under this submission version by this student for
-	 *         this assignment.
-	 * @throws IOException If the request could not be successfully sent, an
-	 *                     IOException is thrown.
-	 *                     
-	 *                     TESTED
-	 */
-	public List<SubmissionResponse> getSubmittedFilesForVersion(String studentId, String assignmentId, String version)
-			throws IOException {
-		return getFilesInformation("submissions", studentId + "/" + assignmentId + "/" + version);
-	}
-
-	/**
 	 * Get the contents of the file with the given file name. This method returns
 	 * the contents in plain text as opposed to the bytes constituting the file.
 	 * 
@@ -469,7 +436,7 @@ public class AutograderClient {
 	 * @return The InputStream of the file downloaded.
 	 * @throws IOException If the request could not be successfully sent, an
 	 *                     IOException is thrown.
-	 *                     
+	 * 
 	 *                     TESTED
 	 */
 	public InputStream getFileInputStream(String studentId, String assignmentId, String version, String fileName)
@@ -485,7 +452,7 @@ public class AutograderClient {
 		if (submission == null) {
 			throw new RuntimeException(String.format("File does not exist '%s' does not exist.", fileName));
 		}
-		
+
 		String path = "/storage/v1/object/submissions/" + profile.authId + "/" + submission.id;
 
 		HttpResponse httpResponse = this.createGetRequest(path).execute();
@@ -535,44 +502,20 @@ public class AutograderClient {
 		return null;
 	}
 
-	private List<SubmissionResponse> getFilesInformation(String bucketName, String path) throws IOException {
-		if (this.accessToken == null) {
-			return null;
-		}
-
-		HttpRequestFactory requestFactory = HTTP_TRANSPORT.createRequestFactory(request -> {
-			request.setParser(new JsonObjectParser(JSON_FACTORY));
-		});
-
-		FileRequest fileRequest = new FileRequest();
-		fileRequest.limit = 100;
-		fileRequest.offset = 0;
-		SortOptions sortOptions = new SortOptions();
-		sortOptions.column = "name";
-		sortOptions.order = "asc";
-		fileRequest.sortBy = sortOptions;
-		fileRequest.prefix = path;
-
-		HttpRequest request = requestFactory.buildPostRequest(
-				new GenericUrl(this.supabaseBaseUrl + "/storage/v1/object/list/" + bucketName),
-				new JsonHttpContent(JSON_FACTORY, fileRequest));
-
-		HttpHeaders headers = request.getHeaders();
-		headers.set("apikey", this.supabaseAnonKey);
-		headers.setAuthorization("Bearer " + this.accessToken);
-		HttpResponse httpResponse = request.execute();
-		if (httpResponse.isSuccessStatusCode()) {
-			SubmissionResponse[] submissionResponses = httpResponse.parseAs(SubmissionResponse[].class);
-			List<SubmissionResponse> filteredSubmissionResponses = Arrays.stream(submissionResponses)
-					.filter(submission -> !submission.name.equals(".emptyFolderPlaceholder"))
-					.collect(Collectors.toList());
-
-			if (filteredSubmissionResponses.size() > 0) {
-				return filteredSubmissionResponses;
+	private List<ProfileResponse> enrollments2profiles(EnrollmentResponse[] enrollments) {
+		Map<String, ProfileResponse> profilesMap = new HashMap<>();
+		for (EnrollmentResponse enrollment : enrollments) {
+			ProfileResponse profile = profilesMap.get(enrollment.profile.id);
+			if (profile == null) {
+				enrollment.profile.classes = new AutograderClass[0];
+				profilesMap.put(enrollment.profile.id, enrollment.profile);
+				profile = enrollment.profile;
 			}
+			List<AutograderClass> classes = new ArrayList<>(Arrays.asList(profile.classes));
+			classes.add(enrollment.singleClass);
+			profile.classes = classes.toArray(new AutograderClass[classes.size()]);
 		}
-
-		return null;
+		return new ArrayList<>(profilesMap.values());
 	}
 
 	private boolean oldisCompleteSubmission(List<SubmissionResponse> submittedFiles, AutograderAssignment assignment) {

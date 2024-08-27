@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Properties;
 
 import classes.AutograderClass;
 import profiles.ProfileResponse;
@@ -11,23 +12,24 @@ import submissions.AssignmentSubmissionResponse;
 public class AutograderClientTest {
 
 	// Note: using service key, needed to get to submissions
-	AutograderClient client = new AutograderClient("supabaseBaseUrl", "supabaseAnonKey");
+	AutograderClient client = new AutograderClient("https://dkcshyaivhlizysxlwbg.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrY3NoeWFpdmhsaXp5c3hsd2JnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTAyODM5NTcsImV4cCI6MjAyNTg1OTk1N30.uW7PCPF750WLbJPvh-SCiifNs2H3jBA4XB2GCc1uS-w");
 
 	public static void main(String[] args) throws IOException {
+		
 		AutograderClientTest tester = new AutograderClientTest();
 		System.out.println("\n **** testing STARTED **** \n");
 		tester.testGetStudentsInClass();
-		tester.getUserProfilesInClass();
+//		tester.getUserProfilesInClass();
 		tester.testGetUserProfile();
-		tester.testGetAssignmentSubmissions();
-		tester.testGetAssignmentSubmission();
-		tester.testDownloadFile();
-		tester.testGetLatestSubmittedVersion();
-		tester.testGetLatestSubmittedVersionFileName();
-		tester.testGetClass();
-		tester.testGetSubmittedStudents();
-		tester.testGetSubmittedVersionsForAssignment();
-		tester.testGetFileInputStream();
+//		tester.testGetAssignmentSubmissions();
+//		tester.testGetAssignmentSubmission();
+//		tester.testDownloadFile();
+//		tester.testGetLatestSubmittedVersion();
+//		tester.testGetLatestSubmittedVersionFileName();
+//		tester.testGetClass();
+//		tester.testGetSubmittedStudents();
+//		tester.testGetSubmittedVersionsForAssignment();
+//		tester.testGetFileInputStream();
 		System.out.println("\n **** testing DONE **** ");
 	}
 
@@ -47,7 +49,6 @@ public class AutograderClientTest {
 		String profileId = "0de3cf6c-0464-4e7b-9d69-46b2b0162636";
 		ProfileResponse response = client.getUserProfile(profileId);
 		System.out.println("testGetUserProfile " + response);
-
 	}
 
 	public void testGetAssignmentSubmissions() throws IOException {
@@ -94,7 +95,7 @@ public class AutograderClientTest {
 	}
 	
 	public void testGetClass() throws IOException {
-		String classId = "47cb01e0-ad85-4225-b46f-4899674a7159";
+		String classId = "1090d880-e9ed-4147-95c9-a62578a63429";
 
 		AutograderClass response = (AutograderClass) client.getClass(classId);
 		System.out.println("testGetClass " + response);
