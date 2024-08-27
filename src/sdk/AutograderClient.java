@@ -121,7 +121,7 @@ public class AutograderClient {
 		}
 
 		String queryString = RestQueryBuilder.from("enrollment")//
-				.select("*,class(*, assignment(*)),profile(*))") //
+				.select("*,class(*),profile(*))") // if we want assignments, change to: "*,class(*, assignment(*)),profile(*))"
 				.equals("profile_id", userId) //
 				.generateQuery();
 
@@ -195,7 +195,7 @@ public class AutograderClient {
 	public List<ProfileResponse> getUserProfilesInClass(String classId, boolean studentsOnly) throws IOException {
 		if (this.accessToken != null) {
 			RestQueryBuilder queryBuilder = RestQueryBuilder.from("enrollment") //
-					.select("*, profile(*), class(*, assignment(*))") //
+					.select("*, profile(*), class(*)") // If we want assignments change to: "*, profile(8), class(*, assignment(*))"
 					.equals("class_id", classId);
 
 			if (studentsOnly) {

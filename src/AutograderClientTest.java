@@ -29,6 +29,7 @@ public class AutograderClientTest {
 	// required: ["test.java"]
 	public static final String assignmentId = "cfdad040-4e03-4bf6-b816-c1f7776959cb";
 	
+	public static String[] passFail = { "PASS", "FAIL" };
 	
 	public static void main(String[] args) throws IOException {
 		
@@ -49,19 +50,35 @@ public class AutograderClientTest {
 		System.out.println("\n **** testing DONE **** ");
 	}
 
+	public static void printResults(String actual, String expected) {
+	   int pass = actual.equals(expected) ? 0 : 1;
+	   System.out.println(passFail[pass]);
+	   if (pass == 1) {
+	      System.out.printf("\tExpected:%s\n\tActual:%s\n\n", expected, actual);
+	   }
+	}
+	
 	public void testGetStudentsInClass() throws IOException {
+	   final String expected = "[email:jeffrey.nakasone@digitalaidseattle.org, ID:0de3cf6c-0464-4e7b-9d69-46b2b0162636, Classes:[name:class 2, quarter:Spring 2024, assignments[]:null]]";
+	   
+	   System.out.print("Testing getStudentsInClass\t");
 		List<ProfileResponse> response = client.getStudentsInClass(classId);
-		System.out.println("testGetStudentsInClass " + response);
+		printResults(response.toString(), expected);
 	}
 
 	public void getUserProfilesInClass() throws IOException {
-		List<ProfileResponse> response = client.getUserProfilesInClass(classId, false);
-		System.out.println("getUserProfilesInClass " + response);
+	   final String expected = "[email:jnakaso@yahoo.com, ID:1bf6b74b-b7ef-4ed4-a23b-8cac2ba04417, Classes:[name:class 2, quarter:Spring 2024, assignments[]:null], email:jeffrey.nakasone@digitalaidseattle.org, ID:0de3cf6c-0464-4e7b-9d69-46b2b0162636, Classes:[name:class 2, quarter:Spring 2024, assignments[]:null]]";
+		
+	   System.out.print("Testing getUserProfilesInClass\t");
+	   List<ProfileResponse> response = client.getUserProfilesInClass(classId, false);
+		printResults(response.toString(), expected);
 	}
 
 	public void testGetUserProfile() throws IOException {
+	   final String expected = "email:jeffrey.nakasone@digitalaidseattle.org, ID:0de3cf6c-0464-4e7b-9d69-46b2b0162636, Classes:[name:class 2, quarter:Spring 2024, assignments[]:null, name:CS 101, quarter:Fall 2024, assignments[]:null]";
 		ProfileResponse response = client.getUserProfile(profileId);
-		System.out.println("testGetUserProfile " + response);
+		System.out.print("Testing getUserProfile\t");
+		printResults(response.toString(), expected);
 	}
 
 	public void testGetAssignmentSubmissions() throws IOException {
