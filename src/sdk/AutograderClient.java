@@ -4,12 +4,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import com.google.api.client.http.GenericUrl;
@@ -32,8 +30,6 @@ import authentication.User;
 import classes.AutograderClass;
 import enrollments.EnrollmentResponse;
 import profiles.ProfileResponse;
-import storage.FileRequest;
-import storage.SortOptions;
 import storage.SubmissionResponse;
 import submissions.AssignmentSubmissionResponse;
 
@@ -133,7 +129,7 @@ public class AutograderClient {
 		if (httpResponse.isSuccessStatusCode()) {
 			EnrollmentResponse[] enrollments = httpResponse.parseAs(EnrollmentResponse[].class);
 			if (enrollments.length > 0) {
-				return this.enrollments2profiles(enrollments).getFirst();
+				return this.enrollments2profiles(enrollments).get(0);
 			}
 		}
 
@@ -516,21 +512,6 @@ public class AutograderClient {
 			profile.classes = classes.toArray(new AutograderClass[classes.size()]);
 		}
 		return new ArrayList<>(profilesMap.values());
-	}
-
-	private boolean oldisCompleteSubmission(List<SubmissionResponse> submittedFiles, AutograderAssignment assignment) {
-		Set<String> submittedFileNames = submittedFiles //
-				.stream() //
-				.map(submission -> submission.name) //
-				.collect(Collectors.toSet());
-
-		for (String requiredFileName : assignment.required_files) {
-			if (!submittedFileNames.contains(requiredFileName)) {
-				return false;
-			}
-		}
-
-		return true;
 	}
 
 	private boolean isCompleteSubmission(List<AssignmentSubmissionResponse> submittedFiles,
