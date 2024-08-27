@@ -107,7 +107,7 @@ public class AutograderClientTest {
 	}
 
 	public void testGetLatestSubmittedVersionFileName() throws IOException {
-		String fileName = "Test2.java";
+		String fileName = "Test.java";
 
 		String response = client.getLatestSubmittedVersion(profileId, assignmentId, fileName);
 		System.out.println("testGetLatestSubmittedVersionFileName " + response);
