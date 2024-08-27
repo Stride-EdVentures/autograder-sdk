@@ -1,6 +1,9 @@
 package classes;
 
 import assignments.AutograderAssignment;
+
+import java.util.Arrays;
+
 import com.google.api.client.util.Key;
 
 public class AutograderClass {
@@ -15,4 +18,9 @@ public class AutograderClass {
 
     @Key("assignment")
     public AutograderAssignment[] assignments;
+    
+    @Override
+    public String toString() {
+       return String.format("name:%s, quarter:%s, assignments[]:%s", name, quarter, Arrays.toString(assignments));
+    }
 }
