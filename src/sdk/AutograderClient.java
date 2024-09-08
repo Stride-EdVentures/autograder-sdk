@@ -25,8 +25,6 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import assignments.AutograderAssignment;
 import authentication.AuthenticationRequest;
 import authentication.AuthenticationResponse;
-import authentication.InviteTeacherRequest;
-import authentication.User;
 import classes.AutograderClass;
 import enrollments.EnrollmentResponse;
 import profiles.ProfileResponse;
@@ -49,16 +47,13 @@ public class AutograderClient {
 	private final static JsonFactory JSON_FACTORY = new JacksonFactory();
 	private final String supabaseBaseUrl;
 	private final String supabaseAnonKey;
-	private final String AUTOGRADER_BASE_URL = "https://autograder-nchs.vercel.app";
 	private String accessToken;
-	private User authenticatedUser;
 	private HttpRequestFactory requestFactory;
 
 	public AutograderClient(String supabaseBaseUrl, String supabaseAnonKey) {
 		this.supabaseBaseUrl = supabaseBaseUrl;
 		this.supabaseAnonKey = supabaseAnonKey;
 		this.accessToken = supabaseAnonKey;
-		this.authenticatedUser = null;
 		this.requestFactory = HTTP_TRANSPORT.createRequestFactory(request -> {
 			request.setParser(new JsonObjectParser(JSON_FACTORY));
 		});
@@ -95,7 +90,6 @@ public class AutograderClient {
 		if (httpResponse.isSuccessStatusCode()) {
 			AuthenticationResponse authenticationResponse = httpResponse.parseAs(AuthenticationResponse.class);
 			this.accessToken = authenticationResponse.access_token;
-			this.authenticatedUser = authenticationResponse.user;
 			return authenticationResponse;
 		}
 
@@ -136,32 +130,6 @@ public class AutograderClient {
 		return null;
 	}
 
-	/**
-	 * Invites a teacher to the Autograder application by emailing them.
-	 * 
-	 * @param email The email of the teacher to invite.
-	 * @return Whether the request was successful.
-	 * @throws IOException If the request could not be successfully sent, an
-	 *                     IOException is thrown.
-	 */
-	public boolean inviteTeacher(String email) throws IOException {
-		if (this.accessToken == null) {
-			return false;
-		}
-
-		HttpRequestFactory requestFactory = HTTP_TRANSPORT.createRequestFactory(request -> {
-			request.setParser(new JsonObjectParser(JSON_FACTORY));
-		});
-
-		HttpRequest request = requestFactory.buildPostRequest(
-				new GenericUrl(this.AUTOGRADER_BASE_URL + "/api/auth/inviteTeacher"),
-				new JsonHttpContent(JSON_FACTORY, new InviteTeacherRequest(this.authenticatedUser.email, email)));
-
-		HttpHeaders headers = request.getHeaders();
-		headers.setAuthorization("Bearer " + this.accessToken);
-		HttpResponse httpResponse = request.execute();
-		return httpResponse.parseAs(Boolean.TYPE);
-	}
 
 	/**
 	 * Gets a list of all the students in a class. This function is almost identical
